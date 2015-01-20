@@ -1,0 +1,136 @@
+#!/bin/bash
+
+# install cubian on nand
+sudo apt-get update
+sudo apt-get install cubian-nandinstall
+sudo cubian-nandinstall
+
+# remove sdcard
+
+# set new password
+sudo passwd cubie
+
+# do more updating
+sudo apt-get update
+sudo apt-get install cubian-update
+
+# update the time and locales
+sudo ntpdate-debian
+sudo dpkg-reconfigure locales
+sudo dpkg-reconfigure tzdata
+
+# set a static ip
+sudo nano /etc/network/interfaces
+
+# do a reboot to see how things work
+sudo reboot
+
+# set ssh to proper port
+sudo nano /etc/ssh/sshd_config
+
+# forward ports
+sudo apt-get install miniupnpc
+upnpc -a 192.168.1.100 22 22 TCP
+upnpc -a 192.168.1.100 80 80 TCP
+upnpc -a 192.168.1.100 3389 3389 TCP
+
+# enable autologin
+sudo nano /etc/slim.conf
+
+# screensaver using keyboard and mouse
+sudo nano /etc/init.d/screensaver
+    # add the lines
+        #!/bin/sh
+        # a script which turns off the screensaver
+
+        xset s off
+        xset s noblank
+        xset -dpms
+
+# install remote desktop
+sudo apt-get install xrdp
+sudo chown root /usr/lib/chromium/chromium-sandbox
+sudo chmod 4755 /usr/lib/chromium/chromium-sandbox
+
+# setting up video drivers
+sudo apt-get update
+sudo apt-get install cubian-update
+sudo cubian-update
+sudo reboot
+sudo apt-get upgrade
+sudo apt-get install xserver-xorg-core xinit xserver-xorg-video-sunximali alsa-utils mplayer2 gcc make pkg-config libvdpau1 libvdpau-dev
+sudo apt-get autoremove
+sudo nano /etc/modules # add the line: sunxi_cedar_mod
+git clone https://github.com/linux-sunxi/libvdpau-sunxi.git
+cd libvdpau-sunxi
+make
+sudo make install
+sudo nano /etc/environment # add the line: VDPAU_DRIVER=sunxi
+sudo nano /lib/udev/rules.d/90-sunxi-disp-permission.rules
+    # add the following:
+    # KERNEL=="disp", MODE="0777", GROUP="video"
+    # KERNEL=="cedar_dev", MODE="0777", GROUP="video"
+sudo usermod -G sudo,video,audio cubie
+
+# setting up mplayer config file
+sudo nano ~/.mplayer/config
+    # vo=vdpau
+    # vc=ffmpeg12vdpau,ffh264vdpau,ffwmv3vdpau,ffvc1vdpau
+    # ao=alsa:device=how=0.0
+    # fs=yes
+    # framedrop=yes
+
+# prepare apache, mysql and php
+sudo apt-get install apache2
+sudo apt-get install mysql-server
+sudo apt-get install php5 php-pear php5-mysql
+sudo nano /etc/apache2/conf.d/fqdn # add ServerName localhost
+sudo service apache2 restart
+
+# install wordpress
+wget http://wordpress.org/latest.tar.gz
+tar -xzvf latest.tar.gz
+mysql -u root -p
+CREATE DATABASE wordpress_database;
+GRANT ALL PRIVILEGES ON wordpress_database.* TO "food_blog"@"localhost" IDENTIFIED BY "4H4u5m4t3$";
+FLUSH PRIVILEGES;
+EXIT
+
+cd wordpress
+sudo cp -r * /var/www/
+sudo rm /var/www/index.html
+
+# run the install script at http://192.168.1.100/wp-admin/install.php
+# follow all the steps
+
+# install transmission
+sudo apt-get install transmission-cli
+
+# setting proper wordpress permissions
+sudo chown www-data:www-data -R *     
+sudo find . -type d -exec chmod 755 {} \;
+sudo find . -type f -exec chmod 644 {} \;
+
+# install the two plugins before the theme
+
+# install wep-plex photo theme using the browser
+
+# reset proper permissions as above
+
+/*** EDITS MADE TO header.php ***/
+
+<h2 id="homepage-title">
+				<span><?php echo of_get_option('home_subtitle', 'Most Recent'); ?></span>
+</h2>
+
+# above was removed after 
+        # // Display subtitle if defined in the options panel
+		# if ( of_get_option('home_subtitle') !== '' ) {
+		# // Display subtitle as long as it's not a paginated page
+		# if ( !is_paged() ) {
+		# ?>
+	
+/***    ***/
+
+# cubieboard black screen
+sudo rm ~/.Xauthority

@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# install cubian on nand
+sudo nano /etc/apt/sources.list
+    #deb http://ports.ubuntu.com/ubuntu-ports/ quantal main universe
+    #deb-src http://ports.ubuntu.com/ubuntu-ports/ quantal main universe
+
+    deb http://old-releases.ubuntu.com/ubuntu/ quantal main restricted universe multiverse
+    deb http://old-releases.ubuntu.com/ubuntu/ quantal-security main restricted universe multiverse
+    deb http://old-releases.ubuntu.com/ubuntu/ quantal-updates main restricted universe multiverse
+
+sudo apt-get update
+sudo apt-get dist-upgrade
+
+sudo apt-get purge xserver-xorg-core
+sudo apt-get autoremove
+
+# set new password
+sudo passwd linaro
+
+# update the time and locales
+sudo locale-gen en_US.UTF-8
+sudo dpkg-reconfigure locales
+sudo dpkg-reconfigure tzdata
+
+# set a static ip
+sudo nano /etc/network/interfaces
+    auto lo eth0
+    iface lo inet loopback
+
+    iface eth0 inet static
+        address 192.168.1.100
+        gateway 192.168.1.1
+        netmask 255.255.255.0
+
+# do a reboot to see how things work
+sudo reboot
+
+# forward ports
+sudo apt-get install miniupnpc
+upnpc -a 192.168.1.100 22 22 TCP
+upnpc -a 192.168.1.100 80 80 TCP
+upnpc -a 192.168.1.100 3389 3389 TCP
+
+# prepare apache, php
+sudo apt-get install apache2
+sudo apt-get install php5
